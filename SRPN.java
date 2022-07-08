@@ -167,7 +167,7 @@ public class SRPN {
     }
   }
 
-  // Performs multiplication
+  // performs multiplication
   public void multiply(int lastVal) {
     try {
       int num1 = nums.pop();
@@ -181,6 +181,7 @@ public class SRPN {
     }
   }
 
+  // performs subtraction
   public void minus(int lastVal) {
     try {
       int num1 = nums.pop();
