@@ -1,555 +1,546 @@
+
 /** 
 
 * Program class for an SRPN calculator. 
 
-*/ 
+*/
 
-  
+//Imports necessary libraries
 
-//Imports necessary classes 
+import java.util.*;
 
-import java.util.*; 
+import java.lang.Math;
 
-import java.lang.Math; 
+public class SRPN {
 
-  
+  // Declare and initialise variables
 
-public class SRPN { 
+  private Stack<Integer> nums = new Stack<>();
 
-  
+  private Stack<Integer> dStack = new Stack<>(); // Display Stack used to display
+  // input and for performing stack functions
 
-  //Declare and initialise  
+  private Stack<Integer> tempS = new Stack<>(); // Temporary stack used to display
+  // last value of stack after calculated
+  // value popped from stack
+  private int num1 = 0;
+  private int num2 = 0; 
+  private int result = 0; 
+  int rCount = 0;
 
-  private Stack<Integer> nums = new Stack<>(); 
+  public void processCommand(String s) {
 
-  private Stack<Integer> dStack = new Stack<>(); //Display Stack used to display input and for performing stack functions 
+    // Declare and initialise variables
 
-  private Stack<Integer> tempS = new Stack<>(); //Temporary stack used to display last value of stack after calculated value popped from stack 
+    String stack = s;
 
-  int rCount = 0; 
+    // Splits the input to handle multiple operators
 
-  
+    // in a line
 
-  public void processCommand(String s) { 
+    String[] stackArray = stack.split("((?<=[+-/*^d #=])|(?=[+-/*^d #=]))");
 
-  
+    int len = stackArray.length;
 
-    //Declare and initialise variables 
+    // Loops through each of the elements of the stackArray
 
-    String stack = s; 
+    for (int i = 0; i < len; i++) {
 
-    //Splits the input to handle multiple operators 
+      // Handles comments entered in the input
 
-    //in a line 
+      if (stackArray[i].equals("#") && stackArray[i + 1].equals(" ")) {
 
-    String[] stackArray = stack.split("((?<=[+-/*^d #=])|(?=[+-/*^d #=]))"); 
+        i++;
 
-    int len = stackArray.length; 
+        while (!(stackArray[i].equals("#") && stackArray[i - 1].equals(" "))) {
 
-     
+          i++;
 
-    //Loops through each of the elements of the stackArray 
+        }
 
-    for (int i = 0; i < len; i++) { 
+        i++;
 
-  
+        if (i >= len) {
 
-      //Handles comments entered in the input 
+          break;
 
-       
+        }
 
-      if (stackArray[i].equals("#") && stackArray[i+1].equals(" ")){ 
+      }
 
-        i++; 
+      // Uses switch for similar operators
 
-        while (!(stackArray[i].equals("#") && stackArray[i-1].equals(" "))){ 
+      // Checks input against the cases presented and executes the desired method
 
-        i++; 
+      try {
 
-        } 
+        switch (stackArray[i]) {
 
-        i++; 
+          case "+":
+            addition(nums.peek()); // Peek //used to save value
 
-      if (i >= len){ 
+            continue; // Continue used to move to next element in split array
 
-        break; 
+          case "*":
+            multiply(nums.peek());
 
-        } 
+            continue;
 
-      } 
+          case "/":
+            divide(nums.peek());
 
-//Uses switch for similar operators 
+            continue;
 
-//Checks input against the cases presented and executes the desired method 
+          case "%":
+            remainder(nums.peek());
 
-      try { 
+            continue;
 
-        switch (stackArray[i]) { 
+          case "^":
+            power(nums.peek());
 
-          case "+" : addition(nums.peek()); //Peek //used to save value 
+            continue;
 
-          continue;  //Continue used to move to next element in split array 
+          case "d":
+            display();
 
-          case "*" : multiply(nums.peek()); 
+            continue;
 
-          continue; 
+        }
 
-          case "/" : divide(nums.peek()); 
+      } catch (EmptyStackException e) {
 
-          continue; 
+        System.out.println("Stack underflow.");
 
-          case "%" : remainder(nums.peek()); 
+        continue;
 
-          continue; 
+      }
 
-          case "^" : power(nums.peek()); 
+      if (i >= len) {
 
-          continue; 
+        break;
 
-          case "d" : display(); 
+      }
 
-          continue; 
+      if (stackArray[i].equals(" ")) {// if input is space moves to next element
 
-        } 
+        continue;
 
-      } catch (EmptyStackException e) { 
+      }
 
-        System.out.println("Stack underflow.");  
+      else if (stackArray[i].equals("=")) {
 
-        continue;  
+        // displays the value at the top of the stack to show the result of the last
+        // calculation
 
-      } 
+        if (Arrays.asList(stackArray).indexOf("=") == 0) {
 
-  
+          try {
 
-      if (i >= len){ 
+            if (s.contentEquals("=")) {
 
-          break; 
+              System.out.println(nums.peek());
 
-      } 
+            }
 
-       
+          } catch (EmptyStackException e) {
 
-      if (stackArray[i].equals(" ")) {//if input //is space moves to next element 
+            System.out.println("Stack empty");
 
-        continue; 
+          }
 
-      } 
+        }
 
-       
+      }
 
-      else if (stackArray[i].equals("=")) { 
+      else if (stackArray[i].equals("-")) {
 
-        //displays the value at the top of the stack to show the result of the last calculation 
+        try {
 
-        if (Arrays.asList(stackArray).indexOf("=") == 0) { 
+          long num1 = nums.pop();
 
-          try { 
+          long num2 = nums.pop();
 
-            if(s.contentEquals("=")) { 
+          long result = num2 - num1;
 
-              System.out.println(nums.peek()); 
+          if (result > Integer.MAX_VALUE) { // checks saturation for the minus operand
 
-          } 
+            result = Integer.MAX_VALUE;
 
-          } catch (EmptyStackException e) { 
+          }
 
-            System.out.println("Stack empty"); 
+          else if (result < Integer.MIN_VALUE) {
 
-          } 
+            result = Integer.MIN_VALUE;
 
-        } 
+          }
 
-      } 
+          nums.push((int) result);
 
-      else if (stackArray[i].equals("-")) { 
+        } catch (EmptyStackException e) {
 
-        try{ 
+          System.out.println("Stack underflow");
 
-          long num1 = nums.pop(); 
+        }
 
-          long num2 = nums.pop(); 
+      }
 
-          long result = num2 - num1; 
+      // Calls random number from array of pseudo-random numbers
 
-          if(result > Integer.MAX_VALUE) { //checks saturation for the minus operand 
+      else if (stackArray[i].equals("r")) {
 
-              result = Integer.MAX_VALUE; 
+        if (rCount == 22) {
 
-          } 
+          rCount = 0;
 
-          else if(result < Integer.MIN_VALUE) { 
+        }
 
-              result = Integer.MIN_VALUE; 
+        int currentRand = random(rCount);
 
-          } 
+        if (nums.size() < 23) {
 
-          nums.push((int)result); 
+          nums.push(currentRand);
 
-        } catch (EmptyStackException e) { 
+          tempS.push(currentRand);
 
-          System.out.println("Stack underflow"); 
+          rCount++; // Adds to randomCount so next time a new number is used
 
-        } 
+        }
 
-      } 
+        else {
 
-      //Calls random number from array of pseudo-random numbers 
+          System.out.println("Stack overflow.");
 
-      else if (stackArray[i].equals("r")) { 
+          tempS.push(nums.peek());// checks and //return value from the temporary stack
 
-        if (rCount == 22) { 
+        }
 
-          rCount = 0; 
+      }
 
-        } 
+      // moves to next line
 
-        int currentRand = random(rCount); 
+      else if (stackArray[i].equals("")) {
 
-        if (nums.size() < 23) { 
+        System.out.println("");
 
-          nums.push(currentRand); 
+      }
 
-          tempS.push(currentRand); 
+      // passes value to the input method
 
-          rCount++; //Adds to randomCount so next time a new number is used 
+      else {
 
-        } 
+        inVal(stackArray[i]);
 
-        else{ 
+      }
 
-          System.out.println("Stack overflow."); 
+    }
 
-          tempS.push(nums.peek());//checks and //return value from the temporary stack 
+    // Resets temporary stack ready for next input
 
-           
+    tempS.clear();
 
-        } 
+  }
+  public void processSubtraction(String s) {
+      
+    if (checkForUnderflow()) {  
+    }
+    else {
+      num2 = dStack.pop();
+      num1 = dStack.pop();
+      result = num2 - num1;
+      
+      // check for saturation. num1 must be negative 
+      // and num2 must be positive for saturation to 
+      // possibly apply     
+      if (num1 < 0 && num2 > 0 && result > 0) {
+        dStack.push(Integer.MIN_VALUE);
+        result = Integer.MIN_VALUE;           
+      }
+      else {
+        dStack.push(result);
+      }
+    }
+}
 
-        } 
+  // Method used when no operator and incorrect operator, string is parsed to an
+  // int and pushed //onto the numS stack.
 
-//moves to next line 
+  // If the stack isn't full (above 23 numbers), //add the number passed to the
+  // stack,
 
-      else if (stackArray[i].equals("")) { 
+  // otherwise, output stack overflow
 
-        System.out.println(""); 
+  // error message displays unrecognised operator //or operand
 
-      } 
+  public void inVal(String integerStrg) {
 
-       
+    try {
 
-//passes value to the input method 
+      int val = Integer.parseInt(integerStrg);
 
-      else { 
+      if (nums.size() < 23) {
 
-        inVal(stackArray[i]); 
+        nums.push(val);
 
-      } 
+        tempS.push(val);
 
-    } 
+      }
 
-    //Resets temporary stack ready for next input 
+      else {
 
-    tempS.clear(); 
+        System.out.println("Stack overflow.");
 
-  } 
+      }
 
-  
+    } catch (NumberFormatException e) {
 
-  //Method used when no operator and incorrect operator, string is parsed to an int and pushed //onto the numS stack. 
+      System.out.println("Unrecognised operator or operand " + "\"" + integerStrg + "\".");
 
-  //If the stack isn't full (above 23 numbers), //add the number passed to the stack,  
+    }
 
-  //otherwise, output stack overflow  
+  }
 
-  //error message displays unrecognised operator //or operand 
+  // specifying the variable storage for the maximum or minimum possible values
+  // the data type can hold//
 
-  public void inVal(String integerStrg) { 
+  public void checkSaturation(int result, long total, int num2, int num1) {
 
-    try{ 
+    if (total > Integer.MAX_VALUE) {
 
-      int val = Integer.parseInt(integerStrg); 
+      result = Integer.MAX_VALUE; // If max is exceeded, push max value to stack
 
-      if (nums.size() < 23){ 
+      nums.push(result);
 
-      nums.push(val); 
+    }
 
-      tempS.push(val); 
+    else if (total < Integer.MIN_VALUE) {
 
-      } 
+      result = Integer.MIN_VALUE;
 
-      else { 
+      nums.push(result); // If min is exceeded, push min value to stack
 
-        System.out.println("Stack overflow."); 
+    }
 
-      } 
+    else {
 
-    } catch (NumberFormatException e){ 
+      nums.push(result);
 
-      System.out.println("Unrecognised operator or operand " +"\"" + integerStrg +"\"."); 
+    }
 
-    } 
+  }
 
-  } 
+  // addition function
 
-  
+  public void addition(int lastVal) { // Last value //parameter used to add value back to stack in the event of error
 
-  //specifying the variable storage for the maximum or minimum possible values the data type can hold// 
+    try {
 
-  
+      int num1 = nums.pop();
 
-  public void checkSaturation(int result, long total, int num2, int num1){ 
+      int num2 = nums.pop();
 
-    if (total > Integer.MAX_VALUE) { 
+      long total = (long) num2 + (long) num1; // Convert to long to check for saturation
 
-      result = Integer.MAX_VALUE; //If max is exceeded, push max value to stack 
+      int result = num2 + num1;
 
-      nums.push(result); 
+      checkSaturation(result, total, num2, num1);
 
-    } 
+    } catch (EmptyStackException e) {
 
-    else if (total < Integer.MIN_VALUE) { 
+      System.out.println("Stack underflow."); // If there are not enough operands to perform calc then display error
 
-      result = Integer.MIN_VALUE; 
+      nums.push(lastVal); // Last value is pushed back onto stack
 
-      nums.push(result); //If min is exceeded, push min value to stack 
+    }
 
-    } 
+  }
 
-    else { 
+  // Performs multiplication
 
-      nums.push(result); 
+  public void multiply(int lastVal) {
 
-    } 
+    try {
 
-  } 
+      int num1 = nums.pop();
 
-  
+      int num2 = nums.pop();
 
-  //addition function 
+      long total = (long) num2 * (long) num1;
 
-  public void addition(int lastVal){ //Last value //parameter used to add value back to stack in the event of error 
+      int result = num2 * num1;
 
-    try { 
+      checkSaturation(result, total, num2, num1);
 
-      int num1 = nums.pop(); 
+    } catch (EmptyStackException e) {
 
-      int num2 = nums.pop(); 
+      System.out.println("Stack underflow");
 
-      long total = (long)num2 + (long)num1; //Convert to long to check for saturation 
+      nums.push(lastVal);
 
-      int result = num2 + num1; 
+    }
 
-      checkSaturation(result, total, num2, num1); 
+  }
 
-    } catch (EmptyStackException e) { 
+  // performs division
 
-      System.out.println("Stack underflow."); //If there are not enough operands to perform calc then display error 
+  public void divide(int lastVal) {
 
-      nums.push(lastVal); //Last value is pushed back onto stack 
+    try {
 
-    } 
+      if (!nums.peek().equals(0)) { // Checks if top value is NOT zero
 
-  } 
+        double num1 = nums.pop();
 
-  
+        double num2 = nums.pop();
 
-  //Performs multiplication 
+        double result = num2 / num1;
 
-  public void multiply(int lastVal){ 
+        nums.push((int) result);
 
-    try { 
+      }
 
-      int num1 = nums.pop(); 
+      else { // If top value is 0 then remove the top two using pop, push a zero onto the
+             // stack and display an error for dividing by zero
 
-      int num2 = nums.pop(); 
+        nums.pop();
 
-      long total = (long)num2 * (long)num1; 
+        nums.pop();
 
-      int result = num2 * num1; 
+        nums.push(0);
 
-      checkSaturation(result, total, num2, num1); 
+        System.out.println("Divide by 0");
 
-    } catch (EmptyStackException e) { 
+      }
 
-      System.out.println("Stack underflow"); 
+    } catch (EmptyStackException e) { // If method //can not be performed display stack underflow //error due to
+                                      // insufficient operands using try-catch
 
-      nums.push(lastVal); 
+      System.out.println("Stack underflow");
 
-    } 
+    }
 
-  } 
+  }
 
-  
+  // performs remainder operation using modulo
 
-  //performs division 
+  public void remainder(int lastVal) {
 
-   
+    try {
 
-  public void divide(int lastVal){ 
+      int num1 = nums.pop();
 
-    try { 
+      int num2 = nums.pop();
 
-      if (!nums.peek().equals(0)){ //Checks if top value is NOT zero 
+      int result = num2 % num1;
 
-        double num1 = nums.pop(); 
+      nums.push(result);
 
-        double num2 = nums.pop(); 
+    } catch (EmptyStackException e) {
 
-        double result = num2 / num1; 
+      System.out.println("Stack underflow");
 
-        nums.push((int)result); 
+      nums.push(lastVal);
 
-      } 
+    }
 
-      else { //If top value is 0 then remove the top two using pop, push a zero onto the stack and display an error for dividing by zero 
+  }
 
-        nums.pop(); 
+  // Performs power operation
 
-        nums.pop(); 
+  public void power(int lastVal) {
 
-        nums.push(0); 
+    try {
 
-        System.out.println("Divide by 0"); 
+      int num1 = nums.pop();
 
-      } 
+      double dnum1 = num1; // Double for math pow method
 
-    } catch (EmptyStackException e) { //If method  
+      int num2 = nums.pop();
 
-//cannot be performed display stack underflow  
+      double dnum2 = num2;// Double for math pow method
 
-//error due to insufficient operands using try-catch 
+      double dresult = Math.pow(dnum2, dnum1);
 
-       
+      int result = (int) dresult;
 
-      System.out.println("Stack underflow"); 
+      long total = (long) dresult;
 
-    } 
+      checkSaturation(result, total, num2, num1);
 
-  } 
+    } catch (EmptyStackException e) {
 
-  
+      System.out.println("Stack underflow");
 
-  //performs remainder operation using modulo 
+      nums.push(lastVal);
 
-   
+    }
 
-  public void remainder(int lastVal){ 
+  }
 
-    try { 
+  // Method used for input of display stack which displays stack in order or input
 
-      int num1 = nums.pop(); 
+  public void display() {
 
-      int num2 = nums.pop(); 
+    String values = Arrays.toString(nums.toArray());
 
-      int result = num2 % num1; 
+    System.out.println(values);
 
-      nums.push(result); 
+    int stackSize = nums.size();
 
-    } catch (EmptyStackException e) { 
+    if (stackSize == 0) {
 
-      System.out.println("Stack underflow"); 
+      System.out.println(Integer.MIN_VALUE); // If stack is empty display the min value for type int
 
-      nums.push(lastVal); 
+    }
 
-    } 
+    else {
 
-  } 
+      for (int j = 0; j < stackSize; j++) { // Push //top value from stack into temporary display
+        // stack and pop from
+        // main nums stack
 
-  
+        dStack.push(nums.peek());
 
-  //Performs power operation 
+        nums.pop();
 
-  public void power(int lastVal){ 
+      }
 
-    try { 
+      int displaySize = dStack.size();
 
-      int num1 = nums.pop(); 
+      for (int j = 0; j < displaySize; j++) { // Pushes values back into main stack whilst
+        // displaying values to give
+        // correct order
 
-      double dnum1 = num1; //Double for math pow method 
+        nums.push(dStack.peek());
+      }
 
-      int num2 = nums.pop(); 
+    }
 
-      double dnum2 = num2;//Double for math pow method 
+  }
+  public boolean checkForUnderflow() {
+    if (dStack.size() <= 1) {
+      System.out.println("Stack underflow.");
+      return true;
+    }
+    return false; 
+}
 
-      double dresult = Math.pow(dnum2, dnum1); 
+  // the list of numbers the 'r' function loops through
 
-      int result = (int)dresult; 
+  // Adds all the "Random" Numbers to the random Queue
 
-      long total = (long)dresult; 
+  public int random(int rCount) {
 
-      checkSaturation(result, total, num2, num1); 
+    int[] rArray = { 1804289383, 46930886, 1681692777, 1714636915, 1957747793, 424238335, 719885386,
 
-    } catch (EmptyStackException e){ 
+        1649760492, 596516649, 1189641421, 1025202362, 1350490027, 783368690, 1102520059, 2044897763,
 
-      System.out.println("Stack underflow"); 
+        1967513926, 1365180540, 1540383426, 304089172, 1303455736, 35005211, 521595368 };
 
-      nums.push(lastVal); 
+    int rNum = rArray[rCount];
 
-    } 
+    return rNum; // Returns random number
 
-  } 
+  }
 
-  
-
-  //Method used for input of display stack which displays stack in order or input 
-
-  public void display(){ 
-
-    String values =Arrays.toString(nums.toArray()); 
-
-      System.out.println(values); 
-
-    int stackSize = nums.size(); 
-
-    if (stackSize == 0) { 
-
-      System.out.println(Integer.MIN_VALUE); //If stack is empty display the min value for type int 
-
-    } 
-
-    else { 
-
-      for (int j = 0; j < stackSize; j++){ //Push //top value from stack into temporary display //stack and pop from main nums stack 
-
-        dStack.push(nums.peek()); 
-
-        nums.pop(); 
-
-      } 
-
-      int displaySize = dStack.size(); 
-
-      for (int j = 0; j < displaySize; j++){ //Pushes values back into main stack whilst //displaying values to give correct order 
-
-        nums.push(dStack.peek()); 
-
-  
-
-      } 
-
-    } 
-
-  } 
-
-  //the list of numbers the 'r' function loops through 
-
-  //Adds all the "Random" Numbers to the random Queue   
-
-  
-
-  public int random(int rCount) { 
-
-    int[] rArray = {1804289383, 46930886, 1681692777, 1714636915, 1957747793, 424238335, 719885386, 
-
-       1649760492, 596516649, 1189641421, 1025202362, 1350490027, 783368690, 1102520059, 2044897763, 
-
-    1967513926, 1365180540, 1540383426, 304089172, 1303455736, 35005211, 521595368}; 
-
-    int rNum = rArray[rCount];  
-
-    return rNum; //Returns random number 
-
-  } 
-
-} 
+}
