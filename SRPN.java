@@ -23,9 +23,6 @@ public class SRPN {
   private Stack<Integer> tempS = new Stack<>(); // Temporary stack used to display
   // last value of stack after calculated
   // value popped from stack
-  private int num1 = 0;
-  private int num2 = 0; 
-  private int result = 0; 
   int rCount = 0;
 
   public void processCommand(String s) {
@@ -77,7 +74,7 @@ public class SRPN {
         switch (stackArray[i]) {
 
           case "+":
-            addition(nums.peek()); // Peek //used to save value
+            addition(nums.peek()); // Peek used to save value
 
             continue; // Continue used to move to next element in split array
 
@@ -88,6 +85,11 @@ public class SRPN {
 
           case "/":
             divide(nums.peek());
+
+            continue;
+
+          case "-":
+            minus(nums.peek());
 
             continue;
 
@@ -153,38 +155,6 @@ public class SRPN {
 
       }
 
-      else if (stackArray[i].equals("-")) {
-
-        try {
-
-          long num1 = nums.pop();
-
-          long num2 = nums.pop();
-
-          long result = num2 - num1;
-
-          if (result > Integer.MAX_VALUE) { // checks saturation for the minus operand
-
-            result = Integer.MAX_VALUE;
-
-          }
-
-          else if (result < Integer.MIN_VALUE) {
-
-            result = Integer.MIN_VALUE;
-
-          }
-
-          nums.push((int) result);
-
-        } catch (EmptyStackException e) {
-
-          System.out.println("Stack underflow");
-
-        }
-
-      }
-
       // Calls random number from array of pseudo-random numbers
 
       else if (stackArray[i].equals("r")) {
@@ -240,27 +210,6 @@ public class SRPN {
     tempS.clear();
 
   }
-  public void processSubtraction(String s) {
-      
-    if (checkForUnderflow()) {  
-    }
-    else {
-      num2 = dStack.pop();
-      num1 = dStack.pop();
-      result = num2 - num1;
-      
-      // check for saturation. num1 must be negative 
-      // and num2 must be positive for saturation to 
-      // possibly apply     
-      if (num1 < 0 && num2 > 0 && result > 0) {
-        dStack.push(Integer.MIN_VALUE);
-        result = Integer.MIN_VALUE;           
-      }
-      else {
-        dStack.push(result);
-      }
-    }
-}
 
   // Method used when no operator and incorrect operator, string is parsed to an
   // int and pushed //onto the numS stack.
@@ -381,6 +330,27 @@ public class SRPN {
 
   }
 
+  public void minus(int lastVal) {
+
+    try {
+
+      int num1 = nums.pop();
+
+      int num2 = nums.pop();
+
+      int result = num2 - num1;
+
+      nums.push(result);
+
+    } catch (EmptyStackException e) {
+
+      System.out.println("Stack underflow");
+
+      nums.push(lastVal);
+
+    }
+
+  }
   // performs division
 
   public void divide(int lastVal) {
@@ -517,13 +487,14 @@ public class SRPN {
     }
 
   }
+
   public boolean checkForUnderflow() {
     if (dStack.size() <= 1) {
       System.out.println("Stack underflow.");
       return true;
     }
-    return false; 
-}
+    return false;
+  }
 
   // the list of numbers the 'r' function loops through
 
